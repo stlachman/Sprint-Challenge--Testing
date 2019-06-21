@@ -27,7 +27,7 @@ describe("Game Routes", () => {
         .expect(201);
     });
 
-    it("sends the correct body type", () => {
+    it("sends the correct body form", () => {
       const game = {
         id: 1,
         title: "Zoom",
@@ -82,6 +82,12 @@ describe("Game Routes", () => {
         .expect(200);
     });
 
+    it("responds with type json", () => {
+      return request(server)
+        .get("/games")
+        .expect("Content-Type", /json/i);
+    });
+
     it("should return an array of games", async () => {
       let games = await db("games");
       Games.insert({ title: "Zoom", genre: "Blaster", release_year: 1992 });
@@ -94,9 +100,42 @@ describe("Game Routes", () => {
       ]);
     });
 
+    it("should return an array of games", async () => {
+      let games = await db("games");
+      Games.insert({ title: "Zoom", genre: "Blaster", release_year: 1992 });
+      Games.insert({ title: "Halo", genre: "Shooter", release_year: 2002 });
+      games = await db("games");
+
+      expect(games).toHaveLength(2);
+    });
+
     it("should return empty array if no games are found", async () => {
       const games = await db("games");
       expect(Array.isArray(games)).toBe(true);
+    });
+
+    describe("GET /games/:id", () => {
+      it("responds with 200 when successful", async () => {
+        let games = await db("games");
+        Games.insert({ title: "Zoom", genre: "Blaster", release_year: 1992 });
+        Games.insert({ title: "Halo", genre: "Shooter", release_year: 2002 });
+        games = await db("games");
+
+        await request(server)
+          .get("/games/1")
+          .expect(200);
+      });
+
+      it("responds with 404 when game is not found", async () => {
+        let games = await db("games");
+        Games.insert({ title: "Zoom", genre: "Blaster", release_year: 1992 });
+        Games.insert({ title: "Halo", genre: "Shooter", release_year: 2002 });
+        games = await db("games");
+
+        await request(server)
+          .get("/games/3")
+          .expect(404);
+      });
     });
   });
 });

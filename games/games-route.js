@@ -22,6 +22,21 @@ router.get("/", (req, res) => {
     });
 });
 
+router.get("/:id", (req, res) => {
+  const { id } = req.params;
+  Games.findById(id)
+    .then(game => {
+      if (game) {
+        res.status(200).json(game);
+      } else {
+        res.status(404).json({ message: "No game with that id" });
+      }
+    })
+    .catch(err => {
+      res.status(500).json({ message: "Error retrieving game" });
+    });
+});
+
 function validateGame(req, res, next) {
   if (req.body && req.body.title && req.body.genre) {
     next();
