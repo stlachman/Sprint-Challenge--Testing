@@ -27,7 +27,7 @@ describe("Game Routes", () => {
         .expect(201);
     });
 
-    it("sends the correct body form", () => {
+    it("inserts the correct game and matches genre", () => {
       const game = {
         id: 1,
         title: "Zoom",
@@ -39,7 +39,7 @@ describe("Game Routes", () => {
         .send(game)
         .then(res => {
           let newGame = res.body;
-          expect(newGame).toEqual(game);
+          expect(newGame.genre).toBe("Blaster");
         })
         .catch(err => {
           console.log(err);
@@ -62,7 +62,7 @@ describe("Game Routes", () => {
         .expect(422);
     });
 
-    it("inserts provided game into db", async () => {
+    it("inserts provided game into db and matches title", async () => {
       let game = {
         id: 1,
         title: "Zoom",
@@ -71,7 +71,7 @@ describe("Game Routes", () => {
       };
       let inserted = await Games.insert(game);
 
-      expect(inserted.title).toBe(game.title);
+      expect(inserted.title).toBe("Zoom");
     });
   });
 
@@ -124,6 +124,22 @@ describe("Game Routes", () => {
         await request(server)
           .get("/games/1")
           .expect(200);
+      });
+
+      it("returns correct game title", async () => {
+        let game = {
+          id: 1,
+          title: "Zoom",
+          genre: "Blaster",
+          release_year: 1992
+        };
+        let inserted = await Games.insert(game);
+
+        await request(server)
+          .get("/games/1")
+          .then(res => {
+            expect(res.body.title).toBe("Zoom");
+          });
       });
 
       it("responds with 404 when game is not found", async () => {
